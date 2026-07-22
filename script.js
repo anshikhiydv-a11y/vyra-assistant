@@ -49,4 +49,4 @@ if (!SpeechRecognition) {
       instruction.textContent = "TAP TO SPEAK";
     }, 2000);
   };
-      }
+          }

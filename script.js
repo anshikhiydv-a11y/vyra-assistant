@@ -1,6 +1,7 @@
 const micButton = document.getElementById("micButton");
 const status = document.querySelector(".status");
 const instruction = document.querySelector(".instruction");
+const response = document.getElementById("response");
 
 const SpeechRecognition =
   window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -30,7 +31,7 @@ if (!SpeechRecognition) {
     status.textContent = "RECEIVED";
     instruction.textContent = "VOICE RECEIVED";
 
-    alert("You said: " + userSpeech);
+    response.textContent = "You said: " + userSpeech;
   };
 
   recognition.onend = () => {
@@ -49,4 +50,4 @@ if (!SpeechRecognition) {
       instruction.textContent = "TAP TO SPEAK";
     }, 2000);
   };
-}
+    }

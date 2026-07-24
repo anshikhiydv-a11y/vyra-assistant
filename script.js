@@ -6,6 +6,9 @@ const response = document.getElementById("response");
 const SpeechRecognition =
   window.SpeechRecognition || window.webkitSpeechRecognition;
 
+const BACKEND_URL =
+  "https://xdocnwwqdgfluiepxbxi.supabase.co/functions/v1/smart-task";
+
 if (!SpeechRecognition) {
   status.textContent = "NOT SUPPORTED";
   instruction.textContent = "BROWSER NOT SUPPORTED";
@@ -21,22 +24,55 @@ if (!SpeechRecognition) {
 
     status.textContent = "LISTENING";
     instruction.textContent = "VYRA IS LISTENING...";
+    response.textContent = "";
   });
 
-  recognition.onresult = (event) => {
+  recognition.onresult = async (event) => {
     const userSpeech = event.results[0][0].transcript;
 
-    console.log("You said:", userSpeech);
-
-    status.textContent = "RECEIVED";
-    instruction.textContent = "VOICE RECEIVED";
-
+    status.textContent = "THINKING";
+    instruction.textContent = "VYRA IS PROCESSING...";
     response.textContent = "You said: " + userSpeech;
+
+    try {
+      const backendResponse = await fetch(BACKEND_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          message: userSpeech
+        })
+      });
+
+      const data = await backendResponse.json();
+
+      if (data.reply) {
+        response.textContent =
+          "You said: " + userSpeech + "\n\nVYRA: " + data.reply;
+      } else if (data.error) {
+        response.textContent = "Backend Error: " + data.error;
+      }
+
+      status.textContent = "RECEIVED";
+      instruction.textContent = "RESPONSE RECEIVED";
+
+    } catch (error) {
+      console.error("Backend connection error:", error);
+
+      status.textContent = "ERROR";
+      instruction.textContent = "BACKEND CONNECTION FAILED";
+
+      response.textContent =
+        "VYRA could not connect to the backend.";
+    }
   };
 
   recognition.onend = () => {
-    status.textContent = "STANDBY";
-    instruction.textContent = "TAP TO SPEAK";
+    if (status.textContent === "LISTENING") {
+      status.textContent = "STANDBY";
+      instruction.textContent = "TAP TO SPEAK";
+    }
   };
 
   recognition.onerror = (event) => {
@@ -50,4 +86,4 @@ if (!SpeechRecognition) {
       instruction.textContent = "TAP TO SPEAK";
     }, 2000);
   };
-    }
+      }
